@@ -124,7 +124,7 @@ export default function PracticeScreen() {
               </Card>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => router.push('/practice/custom')}>
+            <TouchableOpacity onPress={() => router.push('/practice/custom' as any)}>
               <Card style={styles.modeCard} padding="lg">
                 <View style={[styles.modeIcon, { backgroundColor: 'rgba(124, 58, 237, 0.2)' }]}>
                   <Filter size={28} color="#7C3AED" />
@@ -143,7 +143,7 @@ export default function PracticeScreen() {
           <ThemedText variant="h3" style={styles.sectionTitle}>Subjects</ThemedText>
           {subjects.map((subject, index) => (
             <Animated.View key={subject.id} entering={FadeIn.delay(index * 50)}>
-              <TouchableOpacity onPress={() => router.push(`/practice/subject?subject=${subject.id}`)}>
+              <TouchableOpacity onPress={() => router.push(`/practice/subject?subject=${subject.id}` as any)}>
                 <Card style={styles.subjectCard} padding="md">
                   <View style={styles.subjectContent}>
                     <View style={[styles.subjectIcon, { backgroundColor: subject.color }]}>

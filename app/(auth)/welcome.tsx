@@ -34,11 +34,12 @@ export default function WelcomeScreen() {
         contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.Image
-          entering={FadeIn.delay(200).duration(600)}
-          source={{ uri: 'https://images.pexels.com/photos/301920/pexels-photo-301920.jpeg?auto=compress&cs=tinysrgb&w=800' }}
-          style={styles.heroImage}
-        />
+        <Animated.View entering={FadeIn.delay(200).duration(600)}>
+          <Image
+            source={{ uri: 'https://images.pexels.com/photos/301920/pexels-photo-301920.jpeg?auto=compress&cs=tinysrgb&w=800' }}
+            style={styles.heroImage}
+          />
+        </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(400)} style={styles.content}>
           <View style={styles.logoContainer}>

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { supabase } from '@/supabase/client';
 import type { MCQ, DailyQueue, Attempt } from '@/shared/types';
+import { HARDCODED_MCQS } from '@/shared/constants/questions';
 
 interface PracticeState {
   dailyQueue: DailyQueue | null;
@@ -29,111 +30,101 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
   sessionStartTime: null,
 
   generateDailyQueue: async () => {
-    const userId = (await supabase.auth.getUser()).data.user?.id;
-    if (!userId) return;
-
+    const userId = (await supabase.auth.getUser()).data.user?.id || 'local-guest';
     const today = new Date().toISOString().split('T')[0];
 
     // Check if queue exists
-    const { data: existingQueue } = await supabase
-      .from('daily_queues')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('date', today)
-      .single();
+    try {
+      const { data: existingQueue } = await supabase
+        .from('daily_queues')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('date', today)
+        .single();
 
-    if (existingQueue) {
-      set({ dailyQueue: existingQueue });
-      return;
+      if (existingQueue && existingQueue.mcq_ids?.length > 0) {
+        set({ dailyQueue: existingQueue });
+        return;
+      }
+    } catch (e) {
+      // Continue to fallback queue generation
     }
 
     // Get user's profile for preferences
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    let profileExam = 'class_10_cbse';
+    let dailyGoal = 5;
 
-    if (!profile) return;
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      if (profile) {
+        profileExam = profile.exam || 'class_10_cbse';
+        dailyGoal = profile.daily_goal || 5;
+      }
+    } catch (e) {}
 
-    // Retention engine logic - prioritize:
-    // 1. Previously wrong questions
-    // 2. Weak topics (low accuracy)
-    // 3. Long unseen questions
-    // 4. New questions
-
-    const mcqIds: string[] = [];
-
-    // 1. Get wrong questions from attempts
-    const { data: wrongAttempts } = await supabase
-      .from('attempts')
-      .select('mcq_id')
-      .eq('user_id', userId)
-      .eq('is_correct', false)
-      .order('created_at', { ascending: false })
-      .limit(2);
-
-    if (wrongAttempts?.length) {
-      mcqIds.push(...wrongAttempts.map(a => a.mcq_id));
-    }
-
-    // 2. Get remaining questions from user's subjects/chapters
-    const remaining = profile.daily_goal - mcqIds.length;
-
-    if (remaining > 0) {
-      let query = supabase
+    // Fetch matching MCQs from Supabase or fallback
+    let mcqIds: string[] = [];
+    try {
+      const { data: availableMcqs } = await supabase
         .from('mcqs')
         .select('id')
-        .eq('exam', profile.exam);
+        .eq('exam', profileExam)
+        .limit(dailyGoal * 2);
 
-      if (profile.practice_mode === 'subject_wise' && profile.selected_subjects?.length) {
-        query = query.in('subject_id', profile.selected_subjects);
-      } else if (profile.practice_mode === 'chapter_wise' && profile.selected_chapters?.length) {
-        query = query.in('chapter_id', profile.selected_chapters);
+      if (availableMcqs && availableMcqs.length > 0) {
+        mcqIds = availableMcqs.map(m => m.id);
       }
+    } catch (e) {}
 
-      const { data: availableMcqs } = await query.limit(remaining * 3);
-
-      if (availableMcqs?.length) {
-        // Randomly select
-        const shuffled = availableMcqs.sort(() => Math.random() - 0.5);
-        mcqIds.push(...shuffled.slice(0, remaining).map(m => m.id));
-      }
+    // Fallback to hardcoded MCQs if database has no records
+    if (mcqIds.length === 0) {
+      const filtered = HARDCODED_MCQS.filter(m => m.exam === profileExam);
+      const fallbackList = filtered.length > 0 ? filtered : HARDCODED_MCQS;
+      mcqIds = fallbackList.slice(0, dailyGoal).map(m => m.id);
     }
 
-    // Create daily queue
-    const { data: newQueue, error } = await supabase
-      .from('daily_queues')
-      .insert({
-        user_id: userId,
-        date: today,
-        mcq_ids: mcqIds,
-        completed_mcq_ids: [],
-        total_questions: mcqIds.length,
-        completed: 0,
-      })
-      .select()
-      .single();
+    const localQueue: DailyQueue = {
+      id: `queue-${today}`,
+      user_id: userId,
+      date: today,
+      mcq_ids: mcqIds,
+      completed_mcq_ids: [],
+      total_questions: mcqIds.length,
+      completed: 0,
+      created_at: new Date().toISOString(),
+    };
 
-    if (!error && newQueue) {
-      set({ dailyQueue: newQueue });
-    }
+    try {
+      await supabase.from('daily_queues').insert(localQueue);
+    } catch (e) {}
+
+    set({ dailyQueue: localQueue });
   },
 
   fetchDailyQueue: async () => {
-    const userId = (await supabase.auth.getUser()).data.user?.id;
-    if (!userId) return;
-
+    const userId = (await supabase.auth.getUser()).data.user?.id || 'local-guest';
     const today = new Date().toISOString().split('T')[0];
 
-    const { data: queue } = await supabase
-      .from('daily_queues')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('date', today)
-      .single();
+    try {
+      const { data: queue } = await supabase
+        .from('daily_queues')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('date', today)
+        .single();
 
-    set({ dailyQueue: queue });
+      if (queue) {
+        set({ dailyQueue: queue });
+        return;
+      }
+    } catch (e) {}
+
+    // Auto-generate if missing
+    await get().generateDailyQueue();
   },
 
   fetchNextMCQ: async () => {
@@ -143,18 +134,24 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
     const mcqId = dailyQueue.mcq_ids[currentIndex];
     if (!mcqId) return null;
 
-    const { data: mcq } = await supabase
-      .from('mcqs')
-      .select(`
-        *,
-        subjects (name, color),
-        chapters (name)
-      `)
-      .eq('id', mcqId)
-      .single();
+    // Check Supabase first
+    try {
+      const { data: mcq } = await supabase
+        .from('mcqs')
+        .select(`*, subjects (name, color), chapters (name)`)
+        .eq('id', mcqId)
+        .single();
 
-    set({ currentMCQ: mcq, sessionStartTime: Date.now() });
-    return mcq;
+      if (mcq) {
+        set({ currentMCQ: mcq, sessionStartTime: Date.now() });
+        return mcq;
+      }
+    } catch (e) {}
+
+    // Fallback to hardcoded questions
+    const hardcoded = HARDCODED_MCQS.find(m => m.id === mcqId) || HARDCODED_MCQS[currentIndex % HARDCODED_MCQS.length];
+    set({ currentMCQ: hardcoded, sessionStartTime: Date.now() });
+    return hardcoded;
   },
 
   submitAnswer: async (mcqId, selectedOption, timeTakenSeconds) => {

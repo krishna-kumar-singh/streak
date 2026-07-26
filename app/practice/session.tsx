@@ -67,6 +67,11 @@ export default function PracticeSessionScreen() {
   };
 
   const handleNext = async () => {
+    if (currentIndex + 1 >= (dailyQueue?.total_questions || profile?.daily_goal || 5)) {
+      // Session complete
+      router.replace('/(tabs)/home');
+      return;
+    }
     markCompleted();
     setSelectedOption(null);
     setShowResult(false);

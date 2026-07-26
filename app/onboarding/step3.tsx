@@ -46,7 +46,7 @@ export default function OnboardingStep3() {
 
   const selectAllChapters = (subjectId: string) => {
     const chapters = CHAPTERS[subjectId] || [];
-    const allChapterIds = chapters.map(c => c.id);
+    const allChapterIds = chapters.map((c: { id: string }) => c.id);
     setSelectedChapters(prev => {
       const existing = prev.filter(id => !allChapterIds.includes(id));
       return [...existing, ...allChapterIds];
@@ -63,7 +63,8 @@ export default function OnboardingStep3() {
   };
 
   const getSubjectInfo = (subjectId: string) => {
-    return SUBJECTS[exam]?.find(s => s.id === subjectId);
+    const subjectList = SUBJECTS[exam] || [];
+    return subjectList.find((s: { id: string; name: string; icon: string; color: string }) => s.id === subjectId);
   };
 
   return (
@@ -122,7 +123,7 @@ export default function OnboardingStep3() {
                     <TouchableOpacity onPress={() => selectAllChapters(subjectId)}>
                       <ThemedText variant="muted" style={styles.selectAllText}>Select All</ThemedText>
                     </TouchableOpacity>
-                    {chapters.map((chapter) => {
+                    {chapters.map((chapter: { id: string; name: string; order: number }) => {
                       const isSelected = selectedChapters.includes(chapter.id);
                       return (
                         <TouchableOpacity

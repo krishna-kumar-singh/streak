@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ColorValue } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ColorValue, StyleProp, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 interface ButtonProps {
@@ -12,6 +12,7 @@ interface ButtonProps {
   fullWidth?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
 }
 
 export function Button({
@@ -24,6 +25,7 @@ export function Button({
   fullWidth = false,
   leftIcon,
   rightIcon,
+  style,
 }: ButtonProps) {
   const isDisabled = disabled || loading;
 
@@ -77,6 +79,7 @@ export function Button({
         styles.container,
         fullWidth && styles.fullWidth,
         variantStyle.border && { borderWidth: 2, borderColor: variantStyle.border },
+        style,
       ]}
     >
       <LinearGradient

@@ -1,4 +1,4 @@
-export const SUBJECTS = {
+export const SUBJECTS: Record<string, { id: string; name: string; icon: string; color: string }[]> = {
   class_10_cbse: [
     { id: 'math_10', name: 'Mathematics', icon: 'calculator', color: '#4F46E5' },
     { id: 'science_10', name: 'Science', icon: 'flask-conical', color: '#7C3AED' },
@@ -14,7 +14,7 @@ export const SUBJECTS = {
   ],
 };
 
-export const CHAPTERS = {
+export const CHAPTERS: Record<string, { id: string; name: string; order: number }[]> = {
   math_10: [
     { id: 'math_10_ch1', name: 'Real Numbers', order: 1 },
     { id: 'math_10_ch2', name: 'Polynomials', order: 2 },

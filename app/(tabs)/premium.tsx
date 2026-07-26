@@ -3,12 +3,12 @@ import { View, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-nat
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
-import { Crown, Check, Sparkles, FileText, Zap, Shield, ArrowRight } from 'lucide-react-native';
+import { Crown, Check, Sparkles, FileText, Zap, Shield, ArrowRight, TrendingUp } from 'lucide-react-native';
 import { Card, Button, Text as ThemedText } from '@/components/ui';
 import { useAuthStore } from '@/shared/store';
 
 const premiumFeatures = [
-  { icon: BarChart2, title: 'Advanced Analytics', description: 'Topic mastery, error patterns, retention scores' },
+  { icon: TrendingUp, title: 'Advanced Analytics', description: 'Topic mastery, error patterns, retention scores' },
   { icon: Sparkles, title: 'AI Explanations', description: 'Deep explanations for every question' },
   { icon: FileText, title: 'PDF to MCQ', description: 'Upload PDFs and generate custom MCQs' },
   { icon: Shield, title: 'No Ads', description: 'Ad-free practice experience' },
@@ -18,10 +18,6 @@ const pricingPlans = [
   { id: 'monthly', title: 'Monthly', price: '₹99', period: '/month', tag: null },
   { id: 'yearly', title: 'Yearly', price: '₹949', period: '/year', tag: 'Save 20%', originalPrice: '₹1188' },
 ];
-
-function BarChart2({ size, color }: { size: number; color: string }) {
-  return null;
-}
 
 export default function PremiumScreen() {
   const insets = useSafeAreaInsets();

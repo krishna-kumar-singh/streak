@@ -155,7 +155,7 @@ export default function ProfileScreen() {
         <Animated.View entering={FadeIn.delay(200)} style={styles.section}>
           <ThemedText variant="h3" style={styles.sectionTitle}>Settings</ThemedText>
 
-          <TouchableOpacity onPress={() => router.push('/profile/settings')}>
+          <TouchableOpacity onPress={() => router.push('/settings' as any)}>
             <Card style={styles.menuItem} padding="md">
               <View style={styles.menuContent}>
                 <Settings size={20} color="#94A3B8" />

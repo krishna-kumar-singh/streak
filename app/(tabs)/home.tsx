@@ -154,8 +154,8 @@ export default function HomeScreen() {
                 <AnimatedNumber value={stats?.todayCompleted || 0} suffix={` / ${stats?.todayGoal || 5}`} style={styles.progressNumber} />
                 <ThemedText variant="muted">questions completed</ThemedText>
               </View>
-              <View style={[styles.progressCircle, { backgroundColor: stats?.todayCompleted >= (stats?.todayGoal || 5) ? '#10B981' : '#374151' }]}>
-                {stats?.todayCompleted >= (stats?.todayGoal || 5) ? (
+              <View style={[styles.progressCircle, { backgroundColor: (stats?.todayCompleted || 0) >= (stats?.todayGoal || 5) ? '#10B981' : '#374151' }]}>
+                {(stats?.todayCompleted || 0) >= (stats?.todayGoal || 5) ? (
                   <ThemedText style={{ color: '#FFFFFF' }}>✓</ThemedText>
                 ) : (
                   <Play size={20} color="#94A3B8" />
@@ -208,7 +208,7 @@ export default function HomeScreen() {
         {/* Continue Practice Button */}
         <Animated.View entering={FadeInUp.delay(400)} style={styles.ctaSection}>
           <Button
-            title={stats?.todayCompleted >= (stats?.todayGoal || 5) ? "Practice More" : "Continue Practice"}
+            title={(stats?.todayCompleted || 0) >= (stats?.todayGoal || 5) ? "Practice More" : "Continue Practice"}
             onPress={() => router.push('/practice/session')}
             fullWidth
             size="lg"
