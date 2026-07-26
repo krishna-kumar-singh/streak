@@ -16,7 +16,7 @@
       "package": "com.streak.exampractice",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
-        "backgroundColor": "#4F46E5"
+        "backgroundColor": "#5E17EB"
       }
     },
     "web": {
@@ -40,9 +40,11 @@
       "typedRoutes": true
     },
     "extra": {
+      "router": {},
       "eas": {
-        "projectId": "streak-exam-practice"
+        "projectId": "25b2b5f2-7e7a-45fd-aa3e-5c514f3e6e4d"
       }
-    }
+    },
+    "owner": "kkrishna09"
   }
 }
